@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: scpi-invest-plus-partner-service
+spec:
+  type: ClusterIP
+  selector:
+    app: scpi-invest-plus-partner
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+    

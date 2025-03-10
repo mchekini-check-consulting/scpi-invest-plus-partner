@@ -1,0 +1,8 @@
+services:
+  scpi-invest-plus-partner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: scpi-invest-plus-partner
+    ports:
+      - "8081:8080"

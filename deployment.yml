@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scpi-invest-plus-partner
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: scpi-invest-plus-partner
+  template:
+    metadata:
+      labels:
+        app: scpi-invest-plus-partner
+    spec:
+      containers:
+        - name: scpi-invest-plus-partner
+          image: speedskillsx/scpi-invest-plus-partner:2.0
+          ports:
+            - containerPort: 8080
