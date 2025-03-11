@@ -9,5 +9,4 @@ public class ScpiInvestPlusPartnerApplication {
     public static void main(String[] args) {
         SpringApplication.run(ScpiInvestPlusPartnerApplication.class, args);
     }
-
 }
