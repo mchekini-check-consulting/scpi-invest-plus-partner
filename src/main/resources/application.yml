@@ -2,3 +2,14 @@ spring:
   application:
     version: 1.0.0
     name: scpi-invest-plus-partner
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: grp_Id
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
