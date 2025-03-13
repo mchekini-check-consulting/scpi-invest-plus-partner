@@ -17,15 +17,15 @@ import java.util.Map;
 import static fr.formationacademy.scpiinvestpluspartner.utils.Constants.*;
 
 @Component
-public class InvestmentListener {
+public class InvestmentRequestListener {
 
-    private static final Logger log = LogManager.getLogger(InvestmentListener.class);
+    private static final Logger log = LogManager.getLogger(InvestmentRequestListener.class);
 
     private final ObjectMapper objectMapper;
     private final ProcessInvestmentService processInvestmentService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public InvestmentListener(ObjectMapper objectMapper, ProcessInvestmentService processInvestmentService, KafkaTemplate<String, Object> kafkaTemplate) {
+    public InvestmentRequestListener(ObjectMapper objectMapper, ProcessInvestmentService processInvestmentService, KafkaTemplate<String, Object> kafkaTemplate) {
         this.objectMapper = objectMapper;
         this.processInvestmentService = processInvestmentService;
         this.kafkaTemplate = kafkaTemplate;
@@ -35,7 +35,7 @@ public class InvestmentListener {
             topics = SCPI_PARTNER_TOPIC,
             groupId = SCPI_PARTNER_GROUP
     )
-    public void listen(String record) {
+    public void investmentRequestListner(String record) {
         log.info("Message reçu pour l'investissement : {}", record);
         try {
             Map<String, Object> dto = objectMapper.readValue(record, new TypeReference<>() {});
@@ -54,24 +54,12 @@ public class InvestmentListener {
             topics = SCPI_PARTNER_RESPONSE_TOPIC,
             groupId = SCPI_PARTNER_GROUP
     )
-    public void listen(JsonNode dto) {
-        log.info("Message reçu pour la réponse d'investissement : {}", dto);
-
-        if (dto == null || dto.isEmpty()) {
-            log.warn("Message Kafka vide ou mal formé, impossible de le traiter.");
-            return;
-        }
-
-        String investmentState = dto.path("status").asText();
-        String investorEmail = dto.path("investorEmail").asText();
-        String scpiName = dto.path("scpiName").asText();
-
-        if ("ACCEPTED".equalsIgnoreCase(investmentState)) {
-            handleAcceptedInvestment(dto, investorEmail, scpiName);
-        } else if ("REJECTED".equalsIgnoreCase(investmentState)) {
-            handleRejectedInvestment(dto, investorEmail, scpiName);
-        } else {
-            log.info("Statut inconnu reçu : {}", investmentState);
+    public void InvestmentResponseListner(String message) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(message);
+            System.out.println("Investment processing result: " + jsonNode.get("status").asText());
+        } catch (Exception e) {
+            System.err.println("Error parsing JSON: " + e.getMessage());
         }
     }
 
