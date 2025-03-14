@@ -6,10 +6,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.formationacademy.scpiinvestpluspartner.enums.InvestmentState;
 import fr.formationacademy.scpiinvestpluspartner.service.ProcessInvestmentService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -17,18 +15,15 @@ import java.util.Map;
 import static fr.formationacademy.scpiinvestpluspartner.utils.Constants.*;
 
 @Component
+@Slf4j
 public class InvestmentRequestListener {
-
-    private static final Logger log = LogManager.getLogger(InvestmentRequestListener.class);
 
     private final ObjectMapper objectMapper;
     private final ProcessInvestmentService processInvestmentService;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public InvestmentRequestListener(ObjectMapper objectMapper, ProcessInvestmentService processInvestmentService, KafkaTemplate<String, Object> kafkaTemplate) {
+    public InvestmentRequestListener(ObjectMapper objectMapper, ProcessInvestmentService processInvestmentService) {
         this.objectMapper = objectMapper;
         this.processInvestmentService = processInvestmentService;
-        this.kafkaTemplate = kafkaTemplate;
     }
 
     @KafkaListener(

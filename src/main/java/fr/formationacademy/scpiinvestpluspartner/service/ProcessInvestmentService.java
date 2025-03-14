@@ -3,8 +3,7 @@ package fr.formationacademy.scpiinvestpluspartner.service;
 import fr.formationacademy.scpiinvestpluspartner.enums.InvestmentState;
 import fr.formationacademy.scpiinvestpluspartner.utils.Constants;
 import fr.formationacademy.scpiinvestpluspartner.utils.ValidationResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -14,9 +13,9 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class ProcessInvestmentService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProcessInvestmentService.class);
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final TemplateGeneratorService templateGeneratorService;
 
@@ -74,14 +73,14 @@ public class ProcessInvestmentService {
                 "rejectionReason", rejectionReason
         );
 
-        logger.info("Données extraites pour le template: {}", templateData);
+        log.info("Données extraites pour le template: {}", templateData);
 
         try {
             String htmlContent = templateGeneratorService.generateHtml("investment_template", templateData);
             String fileName = "investment_" + (state == InvestmentState.ACCEPTED ? "accepted" : "rejected") + "_" + System.currentTimeMillis();
             templateGeneratorService.saveAndOpenHtml(htmlContent, fileName);
         } catch (Exception e) {
-            logger.error("Erreur lors de la génération du fichier HTML : {}", e.getMessage(), e);
+            log.error("Erreur lors de la génération du fichier HTML : {}", e.getMessage(), e);
         }
     }
 
@@ -158,11 +157,11 @@ public class ProcessInvestmentService {
             if (rejectionReason != null) {
                 response.put("rejectionReason", rejectionReason);
             }
-            logger.info("Données du message Kafka : {}", response);
+            log.info("Données du message Kafka : {}", response);
             kafkaTemplate.send(Constants.SCPI_PARTNER_RESPONSE_TOPIC, response);
-            logger.info("Message de réponse envoyé avec succès !");
+            log.info("Message de réponse envoyé avec succès !");
         } catch (Exception e) {
-            logger.error("Erreur d'envoi Kafka : {}", e.getMessage(), e);
+            log.error("Erreur d'envoi Kafka : {}", e.getMessage(), e);
         }
     }
 
