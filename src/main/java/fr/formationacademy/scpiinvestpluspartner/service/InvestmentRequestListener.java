@@ -5,11 +5,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.formationacademy.scpiinvestpluspartner.enums.InvestmentState;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -38,7 +38,8 @@ public class InvestmentRequestListener {
     public void investmentRequestListner(String record) {
         log.info("Message reçu pour l'investissement : {}", record);
         try {
-            Map<String, Object> dto = objectMapper.readValue(record, new TypeReference<>() {});
+            Map<String, Object> dto = objectMapper.readValue(record, new TypeReference<>() {
+            });
             log.info("Données désérialisées : {}", dto);
             InvestmentState state = processInvestmentService.processInvestment(dto);
             dto.put("investmentState", state.name());
@@ -55,6 +56,7 @@ public class InvestmentRequestListener {
             groupId = SCPI_PARTNER_GROUP
     )
     public void InvestmentResponseListner(String message) {
+        log.info("Starting the treatment of the demand : {}", message);
         try {
             JsonNode jsonNode = objectMapper.readTree(message);
             System.out.println("Investment processing result: " + jsonNode.get("status").asText());
