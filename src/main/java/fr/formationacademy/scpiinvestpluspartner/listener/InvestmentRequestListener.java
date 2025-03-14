@@ -1,17 +1,17 @@
-package fr.formationacademy.scpiinvestpluspartner.service;
+package fr.formationacademy.scpiinvestpluspartner.listener;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.formationacademy.scpiinvestpluspartner.enums.InvestmentState;
+import fr.formationacademy.scpiinvestpluspartner.service.ProcessInvestmentService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.Map;
 
 import static fr.formationacademy.scpiinvestpluspartner.utils.Constants.*;
@@ -32,7 +32,7 @@ public class InvestmentRequestListener {
     }
 
     @KafkaListener(
-            topics = SCPI_PARTNER_TOPIC,
+            topics = SCPI_REQUEST_TOPIC,
             groupId = SCPI_PARTNER_GROUP
     )
     public void investmentRequestListner(String record) {
@@ -55,47 +55,13 @@ public class InvestmentRequestListener {
             topics = SCPI_PARTNER_RESPONSE_TOPIC,
             groupId = SCPI_PARTNER_GROUP
     )
-    public void InvestmentResponseListner(String message) {
-        log.info("Starting the treatment of the demand : {}", message);
-        try {
-            JsonNode jsonNode = objectMapper.readTree(message);
-            System.out.println("Investment processing result: " + jsonNode.get("status").asText());
-        } catch (Exception e) {
-            System.err.println("Error parsing JSON: " + e.getMessage());
-        }
+    public void investmentResponseListener(String message) throws JsonProcessingException {
+        log.info("Message reçu : {}", message);
+        JsonNode jsonNode = objectMapper.readTree(message);
+        String status = jsonNode.get("status").asText();
+        String investorEmail = jsonNode.get("investorEmail").asText();
+        String scpiName = jsonNode.has("scpiName") ? jsonNode.get("scpiName").asText() : "N/A";
+        log.info("Traitement de la demande : Status={}, SCPI={}, Email={}", status, scpiName, investorEmail);
     }
 
-    private void handleAcceptedInvestment(JsonNode dto, String investorEmail, String scpiName) {
-        try {
-            Map<String, Object> response = Map.of(
-                    "investorEmail", investorEmail,
-                    "scpiName", scpiName,
-                    "propertyType", dto.path("propertyType").asText(),
-                    "totalAmount", new BigDecimal(dto.path("totalAmount").asText()),
-                    "numberShares", dto.path("numberShares").asInt(),
-                    "bic", dto.path("bic").asText(),
-                    "rib", dto.path("rib").asText()
-            );
-
-            log.info("Investissement accepté : {}", response);
-            kafkaTemplate.send(SCPI_PARTNER_RESPONSE_TOPIC, response);
-        } catch (Exception e) {
-            log.error("Erreur lors du traitement de l'investissement accepté : {}", e.getMessage(), e);
-        }
-    }
-
-    private void handleRejectedInvestment(JsonNode dto, String investorEmail, String scpiName) {
-        try {
-            Map<String, Object> response = Map.of(
-                    "investorEmail", investorEmail,
-                    "scpiName", scpiName,
-                    "reason", dto.path("reason").asText()
-            );
-
-            log.info("Investissement rejeté : {}", response);
-            kafkaTemplate.send(SCPI_PARTNER_RESPONSE_TOPIC, response);
-        } catch (Exception e) {
-            log.error("Erreur lors du traitement de l'investissement rejeté : {}", e.getMessage(), e);
-        }
-    }
 }
