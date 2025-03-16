@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Confirmation Investissement</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            padding: 1rem;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .accepted { background-color: #2c3e50; }
+        .rejected { background-color: #c0392b; }
+
+        .email-content {
+            padding: 20px;
+            text-align: center;
+        }
+
+        h2 { color: #333; }
+
+        p {
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+         .details-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+
+        .details-table th, .details-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .details-table th {
+            background-color: #ecf0f1;
+        }
+
+        .button {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 12px 20px;
+            font-size: 16px;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .accepted-btn { background-color: #3498db; }
+        .accepted-btn:hover { background-color: #217dbb; }
+        .rejected-btn { background-color: #e74c3c; }
+        .rejected-btn:hover { background-color: #c0392b; }
+
+        .footer {
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 15px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div th:classappend="${status == 'accepted' ? 'accepted' : 'rejected'}" class="header">
+        SCPI Invest Plus
+    </div>
+
+    <div class="email-content">
+        <h2 th:text="${status == 'accepted' ? 'Confirmation de votre investissement' : 'Investissement rejeté'}"></h2>
+        <p>Bonjour,</p>
+        <div th:if="${status == 'accepted'}">
+            <p>Nous avons le plaisir de vous informer que votre demande d'investissement dans
+                <strong th:text="${scpiName}"></strong> a été validée avec succès ! 🎉</p>
+
+            <p><strong>Détails de votre investissement :</strong></p>
+
+            <table class="details-table">
+                <tr><th>Montant total</th><td th:text="${amount} + ' €'"></td></tr>
+                <tr><th>Nombre de parts</th><td th:text="${numberPart}"></td></tr>
+                <tr><th>BIC</th><td th:text="${bic}"></td></tr>
+                <tr><th>RIB</th><td th:text="${rib}"></td></tr>
+            </table>
+
+            <p>Veuillez effectuer un virement en utilisant ces informations.</p>
+            <a class="button accepted-btn" th:href="${appUrl}" target="_blank" rel="noopener noreferrer">Accéder à Invest +</a>
+            <p>Merci de votre confiance,</p>
+        </div>
+
+        <div th:if="${status == 'rejected'}">
+            <p>Votre demande d'investissement dans <strong th:text="${scpiName}"></strong> a été rejetée.</p>
+            <p><strong>Motif :</strong> <span th:text="${rejectionReason}"></span></p>
+            <a class="button rejected-btn" href="mailto:support@scpiinvest.com">Contacter le support</a>
+            <p>Merci de votre compréhension,</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Besoin d'aide ? <a href="mailto:support@scpiinvest.com">Contactez-nous</a></p>
+        <p>&copy; 2024 SCPI Invest Plus. Tous droits réservés.</p>
+    </div>
+</div>
+
+</body>
+</html>
