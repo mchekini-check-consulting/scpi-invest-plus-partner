@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: partner-service
+  labels:
+    app: partner-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: partner-service
+  template:
+    metadata:
+      name: partner-service
+      labels:
+        app: partner-service
+    spec:
+      containers:
+        - name: partner-service
+          image: "{{.Values.image.repo}}/{{.Values.image.name}}:{{.Values.image.tag}}"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+      restartPolicy: Always
+      

@@ -34,7 +34,6 @@ public class ProcessInvestmentService {
 
     private void generateAndOpenHtml(InvestmentState state, Map<String, Object> dto, ValidationResult validationResult) {
         String rejectionReason = getRejectionReason(validationResult);
-
         Map<String, Object> investmentDto = safeCast(dto.get("investmentDto"));
         Map<String, Object> scpi = safeCast(dto.get("scpi"));
 
