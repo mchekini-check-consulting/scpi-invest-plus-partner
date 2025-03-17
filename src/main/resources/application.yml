@@ -3,7 +3,7 @@ spring:
     version: 1.0.0
     name: scpi-invest-plus-partner
   kafka:
-    bootstrap-servers: kafka-1:9092,kafka-2:9093,kafka-3:9094
+    bootstrap-servers: kafka-0.kafka-headless:9092,kafka-1.kafka-headless:9092,kafka-2.kafka-headless:9092
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
