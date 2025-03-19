@@ -1,6 +1,10 @@
 package fr.formationacademy.scpiinvestpluspartner.service;
 
+import fr.formationacademy.scpiinvestpluspartner.dto.ScpiRequestDto;
+import fr.formationacademy.scpiinvestpluspartner.entity.Investment;
 import fr.formationacademy.scpiinvestpluspartner.enums.InvestmentState;
+import fr.formationacademy.scpiinvestpluspartner.mapper.InvestmentMapper;
+import fr.formationacademy.scpiinvestpluspartner.repository.InvestmentRepository;
 import fr.formationacademy.scpiinvestpluspartner.utils.ValidationResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -16,10 +20,20 @@ public class ProcessInvestmentService {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final TemplateGeneratorService templateGeneratorService;
+    private final InvestmentRepository investmentRepository;
+    private final InvestmentMapper investmentMapper;
 
-    public ProcessInvestmentService(KafkaTemplate<String, Object> kafkaTemplate, TemplateGeneratorService templateGeneratorService) {
+    public ProcessInvestmentService(KafkaTemplate<String, Object> kafkaTemplate, TemplateGeneratorService templateGeneratorService, InvestmentRepository investmentRepository, InvestmentMapper investmentMapper) {
         this.kafkaTemplate = kafkaTemplate;
         this.templateGeneratorService = templateGeneratorService;
+        this.investmentRepository = investmentRepository;
+        this.investmentMapper = investmentMapper;
+    }
+
+    public ScpiRequestDto saveInvestment(ScpiRequestDto data) {
+        Investment investment = investmentMapper.toEntity(data);
+        Investment savedInvestment = investmentRepository.save(investment);
+        return investmentMapper.toDto(savedInvestment);
     }
 
     public InvestmentState processInvestment(Map<String, Object> dto) {

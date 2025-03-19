@@ -1,10 +1,11 @@
 package fr.formationacademy.scpiinvestpluspartner.listener;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.formationacademy.scpiinvestpluspartner.dto.ScpiRequestDto;
+import fr.formationacademy.scpiinvestpluspartner.entity.Investment;
+import fr.formationacademy.scpiinvestpluspartner.repository.InvestmentRepository;
 import fr.formationacademy.scpiinvestpluspartner.service.ProcessInvestmentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -19,10 +20,13 @@ public class InvestmentRequestListener {
 
     private final ObjectMapper objectMapper;
     private final ProcessInvestmentService processInvestmentService;
+    private final InvestmentRepository investmentRepository;
 
-    public InvestmentRequestListener(ObjectMapper objectMapper, ProcessInvestmentService processInvestmentService) {
+    public InvestmentRequestListener(ObjectMapper objectMapper, ProcessInvestmentService processInvestmentService, InvestmentRepository investmentRepository) {
         this.objectMapper = objectMapper;
         this.processInvestmentService = processInvestmentService;
+
+        this.investmentRepository = investmentRepository;
     }
 
     @KafkaListener(
@@ -30,7 +34,14 @@ public class InvestmentRequestListener {
             groupId = SCPI_PARTNER_GROUP
     )
     public void investmentRequestListner(ScpiRequestDto data) {
-        log.info("message reçu de kafka {}", data);
+        log.info("Message reçu de Kafka : {}", data);
+        ScpiRequestDto response = processInvestmentService.saveInvestment(data);
+        Investment savedInvestment = investmentRepository.findById(response.getInvestmentId()).orElse(null);
+        if (savedInvestment != null) {
+            log.info("Investissement correctement enregistré : {}", savedInvestment);
+        } else {
+            log.error("Échec de l'enregistrement de l'investissement avec l'ID : {}", response.getInvestmentId());
+        }
 //        log.info("Message reçu pour l'investissement : {}", record);
 //        try {
 //            Map<String, Object> dto = objectMapper.readValue(record, new TypeReference<>() {
