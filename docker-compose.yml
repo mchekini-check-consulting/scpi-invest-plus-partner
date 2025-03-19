@@ -8,3 +8,14 @@ services:
       MONGO_INITDB_DATABASE: scpi-invest-partner-db
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express-partner
+    ports:
+      - "8086:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: "mongodb://admin:admin@scpi-invest-partner-db:27017/scpi-invest-partner-db?authSource=admin"
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: admin
+      ME_CONFIG_BASICAUTH_USERNAME: user
+      ME_CONFIG_BASICAUTH_PASSWORD: pass
