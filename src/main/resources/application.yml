@@ -1,15 +1,9 @@
 spring:
+  data:
+    mongodb:
+      uri: mongodb://admin:admin@scpi-invest-partner-db:27017/scpi-invest-partner-db?authSource=admin
   application:
     version: 1.0.0
     name: scpi-invest-plus-partner
   kafka:
     bootstrap-servers: kafka-svc.kafka:9094
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-    consumer:
-      group-id: scpi-partner-group
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      properties:
-        spring.json.trusted.packages: "*"

@@ -1,14 +1,12 @@
 package fr.formationacademy.scpiinvestpluspartner.service;
 
 import fr.formationacademy.scpiinvestpluspartner.enums.InvestmentState;
-import fr.formationacademy.scpiinvestpluspartner.utils.Constants;
 import fr.formationacademy.scpiinvestpluspartner.utils.ValidationResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -139,29 +137,29 @@ public class ProcessInvestmentService {
     }
 
     private void sendInvestmentResponse(InvestmentState state, Map<String, Object> dto, ValidationResult validationResult) {
-        try {
-            String rejectionReason = state == InvestmentState.REJECTED ? getRejectionReason(validationResult) : null;
-            Map<String, Object> scpi = safeCast(dto.get("scpi"));
-
-            assert rejectionReason != null;
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", state.name());
-            response.put("investorEmail", dto.get("investorEmail"));
-            response.put("scpiName", Optional.ofNullable(scpi)
-                    .map(s -> s.get("name"))
-                    .map(Object::toString)
-                    .orElse("N/A"));
-            response.put("investmentDto", dto.get("investmentDto"));
-
-            if (rejectionReason != null) {
-                response.put("rejectionReason", rejectionReason);
-            }
-            log.info("Données du message Kafka : {}", response);
-            kafkaTemplate.send(Constants.SCPI_PARTNER_RESPONSE_TOPIC, response);
-            log.info("Message de réponse envoyé avec succès !");
-        } catch (Exception e) {
-            log.error("Erreur d'envoi Kafka : {}", e.getMessage(), e);
-        }
+//        try {
+//            String rejectionReason = state == InvestmentState.REJECTED ? getRejectionReason(validationResult) : null;
+//            Map<String, Object> scpi = safeCast(dto.get("scpi"));
+//
+//            assert rejectionReason != null;
+//            Map<String, Object> response = new HashMap<>();
+//            response.put("status", state.name());
+//            response.put("investorEmail", dto.get("investorEmail"));
+//            response.put("scpiName", Optional.ofNullable(scpi)
+//                    .map(s -> s.get("name"))
+//                    .map(Object::toString)
+//                    .orElse("N/A"));
+//            response.put("investmentDto", dto.get("investmentDto"));
+//
+//            if (rejectionReason != null) {
+//                response.put("rejectionReason", rejectionReason);
+//            }
+//            log.info("Données du message Kafka : {}", response);
+//            kafkaTemplate.send(Constants.SCPI_PARTNER_RESPONSE_TOPIC, response);
+//            log.info("Message de réponse envoyé avec succès !");
+//        } catch (Exception e) {
+//            log.error("Erreur d'envoi Kafka : {}", e.getMessage(), e);
+//        }
     }
 
     @SuppressWarnings("unchecked")
