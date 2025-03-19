@@ -26,11 +26,4 @@ public class KafkaTopicConfig {
                 .build();
     }
 
-    @Bean
-    public NewTopic getResponseTopic() {
-        return TopicBuilder.name(SCPI_PARTNER_RESPONSE_TOPIC)
-                .partitions(1)
-                .replicas(1)
-                .build();
-    }
 }
