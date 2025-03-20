@@ -1,5 +1,6 @@
 package fr.formationacademy.scpiinvestpluspartner.entity;
 
+import fr.formationacademy.scpiinvestpluspartner.enums.InvestmentState;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +22,6 @@ public class Investment {
     private Integer numberYears;
     private BigDecimal amount;
     private String investorEmail;
-    private String investmentState;
+    private InvestmentState investmentState;
     private String scpiName;
 }

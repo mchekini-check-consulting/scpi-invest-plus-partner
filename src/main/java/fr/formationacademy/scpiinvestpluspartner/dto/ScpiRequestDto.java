@@ -1,5 +1,6 @@
 package fr.formationacademy.scpiinvestpluspartner.dto;
 
+import fr.formationacademy.scpiinvestpluspartner.enums.InvestmentState;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,10 +14,11 @@ import java.math.BigDecimal;
 @Builder
 public class ScpiRequestDto {
     private Integer investmentId;
-    private String name;
+    private String scpiName;
     private BigDecimal amount;
     private String investorEmail;
     private String propertyType;
     private Integer numberYears;
+    private InvestmentState investmentState;
 }
 
