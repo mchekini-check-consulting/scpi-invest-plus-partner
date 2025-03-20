@@ -5,4 +5,7 @@ spring:
     bootstrap-servers: localhost:9094
   data:
     mongodb:
-      uri: mongodb://admin:admin@localhost:27017/mongo_db_app?authSource=admin
+      uri: mongodb://admin:admin@localhost:27017/scpi-invest-partner-db?authSource=admin
+
+
+notification-service-url: http://notification-service.scpi-invest-plus-int:8080

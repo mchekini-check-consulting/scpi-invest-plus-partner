@@ -95,15 +95,15 @@
 <body>
 
 <div class="container">
-    <div th:classappend="${status == 'accepted' ? 'accepted' : 'rejected'}" class="header">
+    <div th:classappend="${status.toString() == 'ACCEPTED' ? 'ACCEPTED' : 'REJECTED'}" class="header">
         SCPI Invest Plus
     </div>
 
     <div class="email-content">
-        <h2 th:text="${status == 'accepted' ? 'Confirmation de votre investissement' : 'Investissement rejeté'}"></h2>
+        <h2 th:text="${status.toString() == 'ACCEPTED' ? 'Confirmation de votre investissement' : 'Investissement rejeté'}"></h2>
         <p>Bonjour,</p>
 
-        <div th:if="${status == 'accepted'}">
+        <div th:if="${status.toString() == 'ACCEPTED'}">
             <p>Nous avons le plaisir de vous informer que votre demande d'investissement dans
                 <strong th:text="${scpiName}"></strong> a été validée avec succès ! 🎉</p>
 
@@ -112,15 +112,14 @@
                 <tr><th>Montant total</th><td th:text="${amount} + ' €'"></td></tr>
                 <tr><th>Nombre de parts</th><td th:text="${numberPart}"></td></tr>
                 <tr th:if="${bic}"><th>BIC</th><td th:text="${bic}"></td></tr>
-                <tr th:if="${rib}"><th>RIB</th><td th:text="${rib}"></td></tr>
+                <tr th:if="${iban}"><th>IBAN</th><td th:text="${iban}"></td></tr>
             </table>
 
-            <p>Veuillez effectuer un virement en utilisant ces informations.</p>
-            <a class="button accepted-btn" th:href="${appUrl}" target="_blank" rel="noopener noreferrer">Accéder à Invest +</a>
+            <p>Veuillez effectuer un virement en indiquant dans le motif du virement : <strong th:text="${label}"></strong></p>
             <p>Merci de votre confiance,</p>
         </div>
 
-        <div th:if="${status == 'rejected'}">
+        <div th:if="${status.toString() == 'REJECTED'}">
             <p>Votre demande d'investissement dans <strong th:text="${scpiName}"></strong> a été rejetée.</p>
             <p><strong>Motif :</strong> <span th:text="${rejectionReason}"></span></p>
             <a class="button rejected-btn" href="mailto:support@scpiinvest.com">Contacter le support</a>

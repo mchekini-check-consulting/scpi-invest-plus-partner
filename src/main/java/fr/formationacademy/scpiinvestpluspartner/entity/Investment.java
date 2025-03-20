@@ -24,4 +24,5 @@ public class Investment {
     private String investorEmail;
     private InvestmentState investmentState;
     private String scpiName;
+    private String rejectReason;
 }

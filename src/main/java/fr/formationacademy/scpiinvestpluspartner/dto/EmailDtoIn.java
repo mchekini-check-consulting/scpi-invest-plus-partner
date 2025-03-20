@@ -1,6 +1,5 @@
 package fr.formationacademy.scpiinvestpluspartner.dto;
 
-import fr.formationacademy.scpiinvestpluspartner.enums.InvestmentState;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,9 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class InvestmentResponse {
+public class EmailDtoIn {
 
-    private InvestmentState investmentState;
-    private Integer investmentId;
-    private String rejectionReason;
+    private String from;
+    private String to;
+    private String subject;
+    private String body;
+    private String bodyType;
 }

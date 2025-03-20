@@ -7,3 +7,5 @@ spring:
     name: scpi-invest-plus-partner
   kafka:
     bootstrap-servers: kafka-svc.kafka:9094
+
+notification-service-url: http://notification-service.scpi-invest-plus-int:8080
