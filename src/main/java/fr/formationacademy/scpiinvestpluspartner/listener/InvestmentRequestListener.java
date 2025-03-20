@@ -1,27 +1,22 @@
 package fr.formationacademy.scpiinvestpluspartner.listener;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.formationacademy.scpiinvestpluspartner.dto.ScpiRequestDto;
+import fr.formationacademy.scpiinvestpluspartner.enums.InvestmentState;
 import fr.formationacademy.scpiinvestpluspartner.service.ProcessInvestmentService;
+import fr.formationacademy.scpiinvestpluspartner.utils.ValidationResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-
 
 import static fr.formationacademy.scpiinvestpluspartner.utils.Constants.*;
 
 @Component
 @Slf4j
 public class InvestmentRequestListener {
-
-    private final ObjectMapper objectMapper;
     private final ProcessInvestmentService processInvestmentService;
 
-    public InvestmentRequestListener(ObjectMapper objectMapper, ProcessInvestmentService processInvestmentService) {
-        this.objectMapper = objectMapper;
+    public InvestmentRequestListener(ProcessInvestmentService processInvestmentService) {
         this.processInvestmentService = processInvestmentService;
     }
 
@@ -29,34 +24,37 @@ public class InvestmentRequestListener {
             topics = SCPI_REQUEST_TOPIC,
             groupId = SCPI_PARTNER_GROUP
     )
-    public void investmentRequestListner(ScpiRequestDto data) {
-        log.info("message reçu de kafka {}", data);
-//        log.info("Message reçu pour l'investissement : {}", record);
-//        try {
-//            Map<String, Object> dto = objectMapper.readValue(record, new TypeReference<>() {
-//            });
-//            log.info("Données désérialisées : {}", dto);
-//            InvestmentState state = processInvestmentService.processInvestment(dto);
-//            dto.put("investmentState", state.name());
-//            log.info("Investment processing result: {}", state);
-//        } catch (JsonProcessingException e) {
-//            log.error("Erreur lors de la désérialisation du message Kafka : {}", e.getMessage());
-//        } catch (Exception e) {
-//            log.error("Erreur lors du traitement du message Kafka : {}", e.getMessage());
-//        }
+    public void investmentRequestListener(String message) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ScpiRequestDto data = objectMapper.readValue(message, ScpiRequestDto.class);
+            log.info("Message reçu : {}", data);
+            InvestmentState state = processInvestmentService.processInvestment(data);
+            log.info("Réponse du traitement de l'investissement : {}", data);
+            log.info("Nouveau status aprés traitement de l'investissement : {}", state);
+        } catch (Exception e) {
+            log.error("Erreur de conversion du message Kafka : {}", e.getMessage(), e);
+        }
     }
 
     @KafkaListener(
             topics = SCPI_PARTNER_RESPONSE_TOPIC,
             groupId = SCPI_PARTNER_GROUP
     )
-    public void investmentResponseListener(String message) throws JsonProcessingException {
-        log.info("Message reçu : {}", message);
-        JsonNode jsonNode = objectMapper.readTree(message);
-        String status = jsonNode.get("status").asText();
-        String investorEmail = jsonNode.get("investorEmail").asText();
-        String scpiName = jsonNode.has("scpiName") ? jsonNode.get("scpiName").asText() : "N/A";
-        log.info("Traitement de la demande : Status={}, SCPI={}, Email={}", status, scpiName, investorEmail);
+    public void investmentResponseListener(String message) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ScpiRequestDto response = objectMapper.readValue(message, ScpiRequestDto.class);
+            log.info("Message reçu et converti : {}", response);
+            InvestmentState status = response.getInvestmentState();
+            String investorEmail = response.getInvestorEmail();
+            String scpiName = response.getScpiName() != null ? response.getScpiName() : "N/A";
+            //String rejectionReason = response.getRejectionReason();
+            log.info("Traitement de la demande : Status={}, SCPI={}, Email={}", status, scpiName, investorEmail);
+            ValidationResult validationResult = processInvestmentService.validateInvestment(response);
+            processInvestmentService.sendInvestmentResponse(status, response, validationResult);
+        } catch (Exception e) {
+            log.error("Erreur lors du traitement du message d'investissement : {}", e.getMessage(), e);
+        }
     }
-
 }

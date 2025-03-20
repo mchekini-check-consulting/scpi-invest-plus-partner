@@ -7,5 +7,6 @@ public enum ValidationResult {
     BELOW_MINIMUM_SUBSCRIPTION,
     ABOVE_SUBSCRIPTION_FEES_THRESHOLD,
     ACCEPTED
+
 }
 
