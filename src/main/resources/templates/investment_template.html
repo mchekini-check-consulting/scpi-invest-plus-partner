@@ -44,7 +44,8 @@
             color: #7f8c8d;
             line-height: 1.6;
         }
-         .details-table {
+
+        .details-table {
             width: 100%;
             margin: 20px 0;
             border-collapse: collapse;
@@ -94,24 +95,24 @@
 <body>
 
 <div class="container">
-    <div th:classappend="${investmentState == 'accepted' ? 'accepted' : 'rejected'}" class="header">
+    <div th:classappend="${status == 'accepted' ? 'accepted' : 'rejected'}" class="header">
         SCPI Invest Plus
     </div>
 
     <div class="email-content">
-        <h2 th:text="${investmentState == 'accepted' ? 'Confirmation de votre investissement' : 'Investissement rejeté'}"></h2>
+        <h2 th:text="${status == 'accepted' ? 'Confirmation de votre investissement' : 'Investissement rejeté'}"></h2>
         <p>Bonjour,</p>
-        <div th:if="${investmentState == 'accepted'}">
+
+        <div th:if="${status == 'accepted'}">
             <p>Nous avons le plaisir de vous informer que votre demande d'investissement dans
                 <strong th:text="${scpiName}"></strong> a été validée avec succès ! 🎉</p>
 
             <p><strong>Détails de votre investissement :</strong></p>
-
             <table class="details-table">
                 <tr><th>Montant total</th><td th:text="${amount} + ' €'"></td></tr>
                 <tr><th>Nombre de parts</th><td th:text="${numberPart}"></td></tr>
-                <tr><th>BIC</th><td th:text="${bic}"></td></tr>
-                <tr><th>RIB</th><td th:text="${rib}"></td></tr>
+                <tr th:if="${bic}"><th>BIC</th><td th:text="${bic}"></td></tr>
+                <tr th:if="${rib}"><th>RIB</th><td th:text="${rib}"></td></tr>
             </table>
 
             <p>Veuillez effectuer un virement en utilisant ces informations.</p>
@@ -119,7 +120,7 @@
             <p>Merci de votre confiance,</p>
         </div>
 
-        <div th:if="${investmentState == 'rejected'}">
+        <div th:if="${status == 'rejected'}">
             <p>Votre demande d'investissement dans <strong th:text="${scpiName}"></strong> a été rejetée.</p>
             <p><strong>Motif :</strong> <span th:text="${rejectionReason}"></span></p>
             <a class="button rejected-btn" href="mailto:support@scpiinvest.com">Contacter le support</a>
