@@ -47,11 +47,24 @@ public class ProcessInvestmentService {
         ValidationResult validationResult = validateInvestment(dto);
         InvestmentState state = mapValidationToInvestmentState(validationResult);
         dto.setInvestmentState(state);
+
         if (state == InvestmentState.REJECTED) {
-            dto.setRejectionReason(getRejectionReason(validationResult));
+            String rejectionReason = getRejectionReason(validationResult);
+            dto.setRejectionReason(rejectionReason);
+            log.info("Motif du rejet : {}", rejectionReason);
         }
         sendInvestmentResponse(state, dto, validationResult);
-        // generateAndOpenHtml(state, dto, validationResult);
+        InvestmentResponse response = InvestmentResponse.builder()
+                .investmentState(state)
+                .investorEmail(dto.getInvestorEmail())
+                .scpiName(dto.getScpiName())
+                .investmentId(dto.getInvestmentId())
+                .amount(dto.getAmount())
+                .rejectionReason(dto.getRejectionReason())
+                .build();
+        log.info("L'objet envoyé à la template HTML : {}", response);
+        //generateAndOpenHtml(response);
+        generateAndOpenHtml(state, dto, validationResult);
         return state;
     }
 
@@ -88,15 +101,33 @@ public class ProcessInvestmentService {
         }
     }
 
+    /*private void generateAndOpenHtml(InvestmentResponse response) {
+        InvestmentResponse processedResponse = InvestmentResponse.builder()
+                .investmentState(response.getInvestmentState())
+                .amount(Optional.ofNullable(response.getAmount()).orElse(BigDecimal.ZERO))
+                .investmentId(response.getInvestmentId())
+                .scpiName(Optional.ofNullable(response.getScpiName()).orElse("N/A"))
+                .rejectionReason(Optional.ofNullable(response.getRejectionReason()).orElse("Aucun motif de rejet"))  // Valeur par défaut
+                .investorEmail(Optional.ofNullable(response.getInvestorEmail()).orElse("N/A"))
+                .build();
+        log.info("Données extraites pour le template : {}", processedResponse);
+        try {
+            log.info("État de l'investissement avant génération du HTML : {}", processedResponse.getInvestmentState());
+            String htmlContent = templateGeneratorService.generateHtml("investment_template", processedResponse);
+            templateGeneratorService.generateTemplate(htmlContent);
+        } catch (Exception e) {
+            log.error("Erreur lors de la génération du fichier HTML : {}", e.getMessage(), e);
+        }
+    }*/
+
     public InvestmentState mapValidationToInvestmentState(ValidationResult result) {
         return switch (result) {
             case INVALID_DATA, INVALID_INVESTMENT_DTO, INVALID_SCPI_DTO -> InvestmentState.CANCELED;
             case BELOW_MINIMUM_SUBSCRIPTION, ABOVE_SUBSCRIPTION_FEES_THRESHOLD -> InvestmentState.REJECTED;
             case ACCEPTED -> InvestmentState.ACCEPTED;
-            default -> throw new IllegalStateException("Unexpected value: " + result);
+            default -> ACCEPTED;
         };
     }
-
     public ValidationResult validateInvestment(ScpiRequestDto dto) {
         if (!isValidDto(dto)) {
             return ValidationResult.INVALID_DATA;
@@ -144,8 +175,7 @@ public class ProcessInvestmentService {
         return switch (result) {
             case INVALID_DATA -> "Les données fournies sont invalides.";
             case BELOW_MINIMUM_SUBSCRIPTION -> "Le montant de souscription est inférieur au minimum requis.";
-            default -> "Investissement refusé pour des raisons de validation.";
+            default -> "Investissement refusé pour des raisons inconnues.";
         };
     }
-
 }

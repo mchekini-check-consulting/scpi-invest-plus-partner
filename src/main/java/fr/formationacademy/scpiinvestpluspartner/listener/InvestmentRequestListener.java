@@ -46,10 +46,11 @@ public class InvestmentRequestListener {
             ObjectMapper objectMapper = new ObjectMapper();
             ScpiRequestDto response = objectMapper.readValue(message, ScpiRequestDto.class);
             log.info("Message reçu et converti : {}", response);
+            ScpiRequestDto savedInvestment = processInvestmentService.saveInvestment(response);
+            log.info("Investment sauvegardé avec l'état initial : {}", savedInvestment.getInvestmentState());
             InvestmentState status = response.getInvestmentState();
             String investorEmail = response.getInvestorEmail();
             String scpiName = response.getScpiName() != null ? response.getScpiName() : "N/A";
-            //String rejectionReason = response.getRejectionReason();
             log.info("Traitement de la demande : Status={}, SCPI={}, Email={}", status, scpiName, investorEmail);
             ValidationResult validationResult = processInvestmentService.validateInvestment(response);
             processInvestmentService.sendInvestmentResponse(status, response, validationResult);
