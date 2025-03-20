@@ -1,10 +1,10 @@
 package fr.formationacademy.scpiinvestpluspartner.listener;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.formationacademy.scpiinvestpluspartner.dto.ScpiRequestDto;
-import fr.formationacademy.scpiinvestpluspartner.entity.Investment;
 import fr.formationacademy.scpiinvestpluspartner.enums.InvestmentState;
-import fr.formationacademy.scpiinvestpluspartner.repository.InvestmentRepository;
 import fr.formationacademy.scpiinvestpluspartner.service.ProcessInvestmentService;
+import fr.formationacademy.scpiinvestpluspartner.utils.ValidationResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -15,55 +15,44 @@ import static fr.formationacademy.scpiinvestpluspartner.utils.Constants.*;
 @Slf4j
 public class InvestmentRequestListener {
     private final ProcessInvestmentService processInvestmentService;
-    private final InvestmentRepository investmentRepository;
 
-    public InvestmentRequestListener(ProcessInvestmentService processInvestmentService, InvestmentRepository investmentRepository) {
+    public InvestmentRequestListener(ProcessInvestmentService processInvestmentService) {
         this.processInvestmentService = processInvestmentService;
-        this.investmentRepository = investmentRepository;
     }
 
     @KafkaListener(
             topics = SCPI_REQUEST_TOPIC,
             groupId = SCPI_PARTNER_GROUP
     )
-    public void investmentRequestListener(ScpiRequestDto data) {
-        log.info("Message reçu de Kafka : {}", data);
-
+    public void investmentRequestListener(String message) {
         try {
-            // Sauvegarder l'investissement initial
-            ScpiRequestDto response = processInvestmentService.saveInvestment(data);
-            Investment savedInvestment = investmentRepository.findById(response.getInvestmentId()).orElse(null);
-
-            if (savedInvestment != null) {
-                log.info("Investissement correctement enregistré : {}", savedInvestment);
-            } else {
-                log.error("Échec de l'enregistrement de l'investissement avec l'ID : {}", response.getInvestmentId());
-                return;
-            }
+            ObjectMapper objectMapper = new ObjectMapper();
+            ScpiRequestDto data = objectMapper.readValue(message, ScpiRequestDto.class);
+            log.info("Message reçu : {}", data);
             InvestmentState state = processInvestmentService.processInvestment(data);
-            log.info("Réponse du traitement de l'investissement : {}", response);
-            savedInvestment.setInvestmentState(state);
-            investmentRepository.save(savedInvestment);
-            log.info("Statut de l'investissement mis à jour : {}", state);
-            log.info("Résultat du traitement de l'investissement : {}", state);
+            log.info("Réponse du traitement de l'investissement : {}", data);
+            log.info("Nouveau status aprés traitement de l'investissement : {}", state);
         } catch (Exception e) {
-            log.error("Erreur lors du traitement du message d'investissement : {}", e.getMessage(), e);
+            log.error("Erreur de conversion du message Kafka : {}", e.getMessage(), e);
         }
     }
-
 
     @KafkaListener(
             topics = SCPI_PARTNER_RESPONSE_TOPIC,
             groupId = SCPI_PARTNER_GROUP
     )
-    public void investmentResponseListener(ScpiRequestDto response) {
-        log.info("Message reçu : {}", response);
-
+    public void investmentResponseListener(String message) {
         try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ScpiRequestDto response = objectMapper.readValue(message, ScpiRequestDto.class);
+            log.info("Message reçu et converti : {}", response);
             InvestmentState status = response.getInvestmentState();
             String investorEmail = response.getInvestorEmail();
             String scpiName = response.getScpiName() != null ? response.getScpiName() : "N/A";
+            //String rejectionReason = response.getRejectionReason();
             log.info("Traitement de la demande : Status={}, SCPI={}, Email={}", status, scpiName, investorEmail);
+            ValidationResult validationResult = processInvestmentService.validateInvestment(response);
+            processInvestmentService.sendInvestmentResponse(status, response, validationResult);
         } catch (Exception e) {
             log.error("Erreur lors du traitement du message d'investissement : {}", e.getMessage(), e);
         }

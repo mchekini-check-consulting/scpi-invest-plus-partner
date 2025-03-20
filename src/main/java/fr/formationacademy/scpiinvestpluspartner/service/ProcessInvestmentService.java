@@ -1,6 +1,7 @@
 package fr.formationacademy.scpiinvestpluspartner.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.formationacademy.scpiinvestpluspartner.dto.InvestmentResponse;
 import fr.formationacademy.scpiinvestpluspartner.dto.ScpiRequestDto;
 import fr.formationacademy.scpiinvestpluspartner.entity.Investment;
 import fr.formationacademy.scpiinvestpluspartner.enums.InvestmentState;
@@ -12,7 +13,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,11 +46,14 @@ public class ProcessInvestmentService {
     public InvestmentState processInvestment(ScpiRequestDto dto) {
         ValidationResult validationResult = validateInvestment(dto);
         InvestmentState state = mapValidationToInvestmentState(validationResult);
+        dto.setInvestmentState(state);
+        if (state == InvestmentState.REJECTED) {
+            dto.setRejectionReason(getRejectionReason(validationResult));
+        }
         sendInvestmentResponse(state, dto, validationResult);
-        // generateAndOpenHtml(state, dto, validationResult); // Si cette méthode en a besoin aussi
+        // generateAndOpenHtml(state, dto, validationResult);
         return state;
     }
-
 
     private void generateAndOpenHtml(InvestmentState state, ScpiRequestDto dto, ValidationResult validationResult) {
         String rejectionReason = getRejectionReason(validationResult);
@@ -75,9 +78,7 @@ public class ProcessInvestmentService {
                 "scpiName", scpiName,
                 "rejectionReason", rejectionReason
         );
-
         log.info("Données extraites pour le template: {}", templateData);
-
         try {
             String htmlContent = templateGeneratorService.generateHtml("investment_template", templateData);
             String fileName = "investment_" + (state == ACCEPTED ? "accepted" : "rejected") + "_" + System.currentTimeMillis();
@@ -119,19 +120,20 @@ public class ProcessInvestmentService {
     public void sendInvestmentResponse(InvestmentState state, ScpiRequestDto dto, ValidationResult validationResult) {
         try {
             String rejectionReason = state == InvestmentState.REJECTED ? getRejectionReason(validationResult) : null;
-            Map<String, Object> response = new HashMap<>();
-            response.put("investmentState", state);
-            response.put("investorEmail", dto.getInvestorEmail());
-            response.put("scpiName", dto.getScpiName());
-            response.put("investmentId", dto.getInvestmentId());
-            response.put("amount", dto.getAmount());
-            if (rejectionReason != null) {
-                response.put("rejectionReason", rejectionReason);
-            }
+            log.info("Rejection reason: {}", rejectionReason);
+            InvestmentResponse response = InvestmentResponse.builder()
+                    .investmentState(state)
+                    .investorEmail(dto.getInvestorEmail())
+                    .scpiName(dto.getScpiName())
+                    .investmentId(dto.getInvestmentId())
+                    .amount(dto.getAmount())
+                    .rejectionReason(rejectionReason)
+                    .build();
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonResponse = objectMapper.writeValueAsString(response);
-            log.info("Données du message Kafka : {}", jsonResponse);
-            kafkaTemplate.send(SCPI_PARTNER_RESPONSE_TOPIC, jsonResponse);
+
+            log.info("Données du message Kafka : {}", response);
+            kafkaTemplate.send(SCPI_PARTNER_RESPONSE_TOPIC, response);
             log.info("Message de réponse envoyé avec succès !");
         } catch (Exception e) {
             log.error("Erreur d'envoi Kafka : {}", e.getMessage(), e);
@@ -146,8 +148,4 @@ public class ProcessInvestmentService {
         };
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> safeCast(Object object) {
-        return (object instanceof Map) ? (Map<String, Object>) object : null;
-    }
 }
