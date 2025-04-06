@@ -13,8 +13,7 @@ import org.thymeleaf.context.Context;
 
 import java.math.BigDecimal;
 
-import static fr.formationacademy.scpiinvestpluspartner.enums.InvestmentState.PENDING_PAYMENT;
-import static fr.formationacademy.scpiinvestpluspartner.enums.InvestmentState.VALIDATED;
+import static fr.formationacademy.scpiinvestpluspartner.enums.InvestmentState.*;
 import static fr.formationacademy.scpiinvestpluspartner.utils.Constants.SCPI_PARTNER_RESPONSE_TOPIC;
 
 @Service
@@ -49,17 +48,23 @@ public class InvestmentService {
             kafkaTemplate.send(SCPI_PARTNER_RESPONSE_TOPIC, response);
 
             Context context = new Context();
-            context.setVariable("status", status);
-            context.setVariable("amount", investment.getAmount());
-            context.setVariable("numberPart", 10); // TODO
-            context.setVariable("bic", "ABCDFRPP");
-            context.setVariable("iban", "FR76 12345 67890 12345678901 12");
-            context.setVariable("label", investment.getInvestmentId());
+            if (status == ACCEPTED) {
+                context.setVariable("status", status);
+                context.setVariable("amount", investment.getAmount());
+                context.setVariable("numberPart", 10); // TODO
+                context.setVariable("bic", "ABCDFRPP");
+                context.setVariable("iban", "FR76 12345 67890 12345678901 12");
+                context.setVariable("label", investment.getInvestmentId());
+            } else if (status == REJECTED) {
+                context.setVariable("status", status);
+                context.setVariable("rejectionReason", rejectReason);
+                context.setVariable("scpiName", investment.getScpiName());
+
+            }
 
             log.info("Starting generating template ...");
             String templateInHtmlFormat = templateEngine.process("investment_template.html", context);
             log.info("Generating template done ...");
-
             EmailDtoIn emailDtoIn = EmailDtoIn.builder()
                     .to("me.chekini@gmail.com")
                     .from("me.chekini@gmail.com")
