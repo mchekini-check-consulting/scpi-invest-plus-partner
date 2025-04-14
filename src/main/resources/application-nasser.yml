@@ -1,0 +1,8 @@
+server:
+  port: 8089
+spring:
+  kafka:
+    bootstrap-servers: localhost:9094
+  data:
+    mongodb:
+      uri: mongodb://admin:admin@localhost:27017/scpi-invest-partner-db?authSource=admin

@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: scpi-invest-plus-partner-tls
+spec:
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: lets-encrypt
+  secretName: scpi-invest-plus-partner-tls
+  dnsNames:
+    - {{ if .Values.ingressPrefix }}{{ .Values.ingressPrefix }}.{{ end }}scpi-invest-plus-partner.check-consulting.net
+  usages:
+    - digital signature
+    - key encipherment
