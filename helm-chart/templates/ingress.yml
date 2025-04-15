@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: scpi-invest-plus-partner
+  name: partner-service
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: 'true'
 spec:
@@ -14,7 +14,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: scpi-invest-plus-partner
+                name: partner-service
                 port:
                   number: 8080
   tls:

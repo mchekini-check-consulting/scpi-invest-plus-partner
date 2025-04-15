@@ -13,7 +13,7 @@ public class SwaggerConfig {
         final String securitySchemeName = "bearerAuth";
         return new OpenAPI()
                 .info(new Info()
-                        .title("scpi-invest-plus-api")
+                        .title("scpi-invest-plus-partner")
                         .description("Documentation des API du projet SCPI Partner"))
                 .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .components(new Components()
