@@ -15,7 +15,7 @@ node("ci-node"){
                 "  -Dsonar.projectKey=partner-service \\\n" +
                 "  -Dsonar.projectName='partner-service' \\\n" +
                 "  -Dsonar.host.url=https://sonar.check-consulting.net \\\n" +
-                "  -Dsonar.token=sqp_cdd2c3800ede126217194664c35de90359a87eb2"
+                "  -Dsonar.token=squ_172db7cd93144a9b96e321012b2667d1fca60359"
     }
 
     stage("Build Jar file"){
