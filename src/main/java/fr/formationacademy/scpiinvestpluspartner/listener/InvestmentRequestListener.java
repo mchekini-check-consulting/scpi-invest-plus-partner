@@ -3,6 +3,7 @@ package fr.formationacademy.scpiinvestpluspartner.listener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.formationacademy.scpiinvestpluspartner.dto.ScpiRequestDto;
 import fr.formationacademy.scpiinvestpluspartner.service.ProcessInvestmentService;
+import fr.formationacademy.scpiinvestpluspartner.utils.TopicNameProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -14,13 +15,16 @@ import static fr.formationacademy.scpiinvestpluspartner.utils.Constants.SCPI_REQ
 @Slf4j
 public class InvestmentRequestListener {
     private final ProcessInvestmentService processInvestmentService;
-
-    public InvestmentRequestListener(ProcessInvestmentService processInvestmentService) {
+    private final TopicNameProvider topicNameProvider;
+    private final String scpiInvestRequestTopic;
+    public InvestmentRequestListener(ProcessInvestmentService processInvestmentService, TopicNameProvider topicNameProvider) {
         this.processInvestmentService = processInvestmentService;
+        this.topicNameProvider = topicNameProvider;
+        this.scpiInvestRequestTopic = topicNameProvider.getScpiInvestRequestTopic();
     }
 
     @KafkaListener(
-            topics = SCPI_REQUEST_TOPIC,
+            topics = "#{topicNameProvider.getScpiInvestRequestTopic()}",
             groupId = SCPI_PARTNER_GROUP
     )
     public void investmentRequestListener(String message) {

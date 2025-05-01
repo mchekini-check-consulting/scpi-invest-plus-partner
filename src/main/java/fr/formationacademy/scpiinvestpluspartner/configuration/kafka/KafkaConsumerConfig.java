@@ -1,6 +1,7 @@
 package fr.formationacademy.scpiinvestpluspartner.configuration.kafka;
 
 import fr.formationacademy.scpiinvestpluspartner.dto.ScpiRequestDto;
+import fr.formationacademy.scpiinvestpluspartner.utils.TopicNameProvider;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,16 +27,18 @@ public class KafkaConsumerConfig {
     public String bootstrapServers;
 
     private final KafkaTemplate<Object, Object> kafkaTemplate;
+    private final TopicNameProvider topicNameProvider;
 
-    public KafkaConsumerConfig(KafkaTemplate<Object, Object> kafkaTemplate) {
+    public KafkaConsumerConfig(KafkaTemplate<Object, Object> kafkaTemplate, TopicNameProvider topicNameProvider) {
         this.kafkaTemplate = kafkaTemplate;
+        this.topicNameProvider = topicNameProvider;
     }
 
     @Bean
     public ConsumerFactory<String, ScpiRequestDto> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, SCPI_PARTNER_GROUP);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, topicNameProvider.getGroupTopic());
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "fr.formationacademy.scpiinvestpluspartner.dto");
