@@ -70,7 +70,7 @@ public class InvestmentService {
                 context.setVariable("scpiName", investment.getScpiName());
 
             }
-
+            log.info("Fin du traitement de la demande  {} ", context);
             log.info("Starting generating template ... ");
             String templateInHtmlFormat = templateEngine.process("investment_template.html", context);
             log.info("Generating template done ...");
@@ -81,12 +81,19 @@ public class InvestmentService {
                     .body(templateInHtmlFormat)
                     .bodyType("HTML")
                     .build();
-            notificationClient.sendEmail(emailDtoIn);
+            try {
+                notificationClient.sendEmail(emailDtoIn);
+                log.info("Notification email sent.");
+            }catch (Exception e){
+                log.error(e.getMessage());
+                log.info("Error sending notification");
+            }
             investment.setInvestmentState(PENDING_PAYMENT);
             investmentRepository.save(investment);
 
             response.setInvestmentState(PENDING_PAYMENT);
             kafkaTemplate.send(SCPI_PARTNER_RESPONSE_TOPIC, response);
+            log.info("L'investissement est passé en mode : Pendign payement : {}", investment);
 
 
         });
