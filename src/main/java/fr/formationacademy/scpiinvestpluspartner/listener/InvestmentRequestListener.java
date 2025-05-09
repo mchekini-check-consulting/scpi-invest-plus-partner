@@ -25,7 +25,7 @@ public class InvestmentRequestListener {
 
     @KafkaListener(
             topics = "#{topicNameProvider.getScpiInvestRequestTopic()}",
-            groupId = SCPI_PARTNER_GROUP
+            groupId = "#{topicNameProvider.getGroupTopic()}"
     )
     public void investmentRequestListener(String message) {
         try {

@@ -26,7 +26,7 @@ public class KafkaTopicConfig {
 
     @Bean
     public NewTopic getResponseTopic() {
-        return TopicBuilder.name(SCPI_PARTNER_RESPONSE_TOPIC)
+        return TopicBuilder.name(topicNameProvider.getScpiInvestPartnerResponseTopic())
                 .partitions(1)
                 .replicas(1)
                 .build();
