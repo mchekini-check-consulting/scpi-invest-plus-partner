@@ -8,10 +8,9 @@ import static fr.formationacademy.scpiinvestpluspartner.utils.Constants.*;
 
 @Component
 public class TopicNameProvider {
-    private final String groupTopic;
+    private  String groupTopic;
     private String scpiInvestRequestTopic;
     private String scpiInvestPartnerResponseTopic;
-
     public TopicNameProvider(Environment environment) {
         String activeProfile = getActiveProfile(environment);
         this.scpiInvestRequestTopic = SCPI_REQUEST_TOPIC + "-" + activeProfile;
