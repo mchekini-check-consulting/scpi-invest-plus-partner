@@ -6,9 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
 
-import static fr.formationacademy.scpiinvestpluspartner.utils.Constants.SCPI_PARTNER_RESPONSE_TOPIC;
-import static fr.formationacademy.scpiinvestpluspartner.utils.Constants.SCPI_REQUEST_TOPIC;
-
 @Configuration
 public class KafkaTopicConfig {
     private final TopicNameProvider topicNameProvider;
@@ -16,6 +13,7 @@ public class KafkaTopicConfig {
     public KafkaTopicConfig(TopicNameProvider topicNameProvider) {
         this.topicNameProvider = topicNameProvider;
     }
+
     @Bean
     public NewTopic getTopic() {
         return TopicBuilder.name(topicNameProvider.getScpiInvestRequestTopic())
