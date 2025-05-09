@@ -2,3 +2,6 @@ image:
   repo: mchekini
   name: partner-service
   tag: latest
+
+application:
+  environment: int

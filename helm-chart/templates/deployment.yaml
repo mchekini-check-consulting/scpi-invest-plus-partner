@@ -19,6 +19,9 @@ spec:
         - name: partner-service
           image: "{{.Values.image.repo}}/{{.Values.image.name}}:{{.Values.image.tag}}"
           imagePullPolicy: Always
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "{{.Values.application.environment }}"
           ports:
             - containerPort: 8080
               protocol: TCP
