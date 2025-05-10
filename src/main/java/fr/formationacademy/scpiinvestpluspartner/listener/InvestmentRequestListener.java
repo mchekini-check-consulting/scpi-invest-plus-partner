@@ -16,15 +16,14 @@ import static fr.formationacademy.scpiinvestpluspartner.utils.Constants.SCPI_REQ
 public class InvestmentRequestListener {
     private final ProcessInvestmentService processInvestmentService;
     private final TopicNameProvider topicNameProvider;
-    private final String scpiInvestRequestTopic;
+
     public InvestmentRequestListener(ProcessInvestmentService processInvestmentService, TopicNameProvider topicNameProvider) {
         this.processInvestmentService = processInvestmentService;
         this.topicNameProvider = topicNameProvider;
-        this.scpiInvestRequestTopic = topicNameProvider.getScpiInvestRequestTopic();
     }
 
     @KafkaListener(
-            topics = "#{topicNameProvider.getScpiInvestRequestTopic()}",
+            topics = "#{topicNameProvider.getAllScpiInvestRequestTopics()}",
             groupId = "#{topicNameProvider.getGroupTopic()}"
     )
     public void investmentRequestListener(String message) {
